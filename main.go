@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "roadmap_scraper/cloud-butler/cmd"
+import "github.com/ttreggfd02/cloud-butler/cmd"
 
 func main() {
 	cmd.Execute()
