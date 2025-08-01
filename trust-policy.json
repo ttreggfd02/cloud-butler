@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::717689155096:oidc-provider/oidc.eks.ap-southeast-1.amazonaws.com/id/DC2B7D6D424DA9C494368BAA4DD1ABA8"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "oidc.eks.ap-southeast-1.amazonaws.com/id/DC2B7D6D424DA9C494368BAA4DD1ABA8:sub": "system:serviceaccount:default:cloud-butler-sa"
+        }
+      }
+    }
+  ]
+}
