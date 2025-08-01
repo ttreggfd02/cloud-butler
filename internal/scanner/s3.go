@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go" // Import the smithy-go package
 	"github.com/ttreggfd02/cloud-butler/pkg/aws_session"
 )
 
@@ -41,6 +41,7 @@ func ScanPublicS3Buckets(ctx context.Context, cfg aws.Config) ([]PublicBucketRes
 			fmt.Printf("警告：無法取得儲存桶 %s 的位置，已跳過: %v\n", bucketName, err)
 			continue
 		}
+		// The location constraint for us-east-1 is an empty string.
 		region := string(locationOutput.LocationConstraint)
 		if region == "" {
 			region = "us-east-1"
@@ -57,26 +58,32 @@ func ScanPublicS3Buckets(ctx context.Context, cfg aws.Config) ([]PublicBucketRes
 			Bucket: bucket.Name,
 		})
 
-		var nspab types.NoSuchPublicAccessBlockConfiguration
-		if errors.As(err, &nspab) {
-			results = append(results, PublicBucketResult{
-				BucketName: bucketName,
-				Region:     region,
-				Issue:      "未設定公開存取區塊 (Public Access is not blocked)",
-			})
-			continue
-		} else if err != nil {
-			fmt.Printf("警告：檢查儲存桶 %s 的權限時發生非預期錯誤，已跳過: %v\n", bucketName, err)
+		if err != nil {
+			var apiErr smithy.APIError
+			// Check if the error is an APIError and if its code matches the specific error we're looking for.
+			if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NoSuchPublicAccessBlockConfiguration" {
+				results = append(results, PublicBucketResult{
+					BucketName: bucketName,
+					Region:     region,
+					Issue:      "未設定公開存取區塊 (Public Access is not blocked)",
+				})
+			} else {
+				// Handle other potential errors during GetPublicAccessBlock
+				fmt.Printf("警告：檢查儲存桶 %s 的權限時發生非預期錯誤，已跳過: %v\n", bucketName, err)
+			}
 			continue
 		}
 
-		config := pabOutput.PublicAccessBlockConfiguration
-		if !aws.ToBool(config.BlockPublicAcls) || !aws.ToBool(config.BlockPublicPolicy) || !aws.ToBool(config.IgnorePublicAcls) || !aws.ToBool(config.RestrictPublicBuckets) {
-			results = append(results, PublicBucketResult{
-				BucketName: bucketName,
-				Region:     region,
-				Issue:      "部分或所有公開存取未被封鎖 (Public access block is not fully enabled)",
-			})
+		// If there was no error, pabOutput is valid and we can check the configuration.
+		if pabOutput.PublicAccessBlockConfiguration != nil {
+			config := pabOutput.PublicAccessBlockConfiguration
+			if !aws.ToBool(config.BlockPublicAcls) || !aws.ToBool(config.BlockPublicPolicy) || !aws.ToBool(config.IgnorePublicAcls) || !aws.ToBool(config.RestrictPublicBuckets) {
+				results = append(results, PublicBucketResult{
+					BucketName: bucketName,
+					Region:     region,
+					Issue:      "部分或所有公開存取未被封鎖 (Public access block is not fully enabled)",
+				})
+			}
 		}
 	}
 

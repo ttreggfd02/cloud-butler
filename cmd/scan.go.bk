@@ -1,3 +1,5 @@
+// cmd/scan.go (完整替換)
+
 package cmd
 
 import (
@@ -23,8 +25,8 @@ var scanCmd = &cobra.Command{
 		// --- 根據模式顯示警告 ---
 		if executeMode {
 			fmt.Println("######################################################")
-			fmt.Println("###              -- EXECUTE MODE --                ###")
-			fmt.Println("###      接下來將執行真實的刪除動作，請謹慎操作！      ###")
+			fmt.Println("###               -- EXECUTE MODE --               ###")
+			fmt.Println("###  接下來將執行真實的刪除動作，請謹慎操作！  ###")
 			fmt.Println("######################################################")
 		} else {
 			fmt.Println("--- Dry Run Mode --- (僅報告，不執行任何動作)")
@@ -76,7 +78,7 @@ var scanCmd = &cobra.Command{
 		fmt.Println("\n--- 開始執行 EBS 過舊快照掃描 ---")
 		minDaysOld := viper.GetInt("scanners.ebs.minDaysOldForSnapshots")
 		fmt.Printf("將尋找建立時間超過 %d 天的快照...\n", minDaysOld)
-
+		
 		oldSnapshots, err := scanner.ScanOldSnapshots(context.TODO(), awsCfg, minDaysOld)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "掃描過舊快照失敗: %v\n", err)
@@ -107,14 +109,8 @@ var scanCmd = &cobra.Command{
 		} else {
 			fmt.Println("\n掃描結果：太棒了！沒有發現任何過舊的 EBS 快照。")
 		}
-		
-		// #######################################################################
-		// ###                                                                 ###
-		// ###  START OF MOVED CODE BLOCK: S3 Scan logic now inside Run func   ###
-		// ###                                                                 ###
-		// #######################################################################
-
-		// --- (新功能) 執行 S3 公開儲存桶掃描 ---
+	},
+	// --- (新功能) 執行 S3 公開儲存桶掃描 ---
 		fmt.Println("\n--- 開始執行 S3 公開儲存桶掃描 ---")
 		publicBuckets, err := scanner.ScanPublicS3Buckets(context.TODO(), awsCfg)
 		if err != nil {
@@ -133,14 +129,6 @@ var scanCmd = &cobra.Command{
 		} else {
 			fmt.Println("\n掃描結果：太棒了！沒有發現任何有公開存取風險的 S3 儲存桶。")
 		}
-
-		// #####################################################################
-		// ###                                                               ###
-		// ###  END OF MOVED CODE BLOCK                                      ###
-		// ###                                                               ###
-		// #####################################################################
-
-	}, // <-- The closing brace for the Run function
 }
 
 func init() {
