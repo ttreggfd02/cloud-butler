@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.37.1
 	github.com/aws/aws-sdk-go-v2/config v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.238.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.85.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 )
@@ -22,7 +23,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.85.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.26.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.31.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.35.1 // indirect

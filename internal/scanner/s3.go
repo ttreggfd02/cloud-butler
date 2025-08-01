@@ -1,5 +1,3 @@
-// internal/scanner/s3.go
-
 package scanner
 
 import (
@@ -74,7 +72,6 @@ func ScanPublicS3Buckets(ctx context.Context, cfg aws.Config) ([]PublicBucketRes
 		}
 
 		config := pabOutput.PublicAccessBlockConfiguration
-		// --- 修正點：使用 aws.ToBool() 安全地處理 *bool 型別 ---
 		if !aws.ToBool(config.BlockPublicAcls) || !aws.ToBool(config.BlockPublicPolicy) || !aws.ToBool(config.IgnorePublicAcls) || !aws.ToBool(config.RestrictPublicBuckets) {
 			results = append(results, PublicBucketResult{
 				BucketName: bucketName,
