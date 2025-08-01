@@ -1,0 +1,33 @@
+apiVersion: batch/v1kind: CronJobmetadata:
+
+  name: cloud-butler-nightly-scanspec:
+
+  schedule: "0 2 * * *"
+
+  jobTemplate:
+
+    spec:
+
+      template:
+
+        spec:
+
+          serviceAccountName: cloud-butler-sa
+
+          containers:
+
+          - name: cloud-butler
+
+            image: ttreggfd02/cloud-butler:latest
+
+            imagePullPolicy: Always
+
+            command: ["./cloud-butler", "scan", "--execute"]
+
+            env:
+
+              - name: AWS_REGION
+
+                value: "ap-southeast-1" 
+
+          restartPolicy: OnFailure
