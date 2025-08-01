@@ -110,6 +110,25 @@ var scanCmd = &cobra.Command{
 			fmt.Println("\n掃描結果：太棒了！沒有發現任何過舊的 EBS 快照。")
 		}
 	},
+	// --- (新功能) 執行 S3 公開儲存桶掃描 ---
+		fmt.Println("\n--- 開始執行 S3 公開儲存桶掃描 ---")
+		publicBuckets, err := scanner.ScanPublicS3Buckets(context.TODO(), awsCfg)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "掃描 S3 公開儲存桶失敗: %v\n", err)
+			os.Exit(1)
+		}
+		if len(publicBuckets) > 0 {
+			fmt.Println("\n[預演模式] 掃描結果：發現以下有風險的 S3 儲存桶！")
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+			fmt.Fprintln(w, "Bucket Name\tRegion\tIssue")
+			fmt.Fprintln(w, "------------\t----------\t----------")
+			for _, bucket := range publicBuckets {
+				fmt.Fprintf(w, "%s\t%s\t%s\n", bucket.BucketName, bucket.Region, bucket.Issue)
+			}
+			w.Flush()
+		} else {
+			fmt.Println("\n掃描結果：太棒了！沒有發現任何有公開存取風險的 S3 儲存桶。")
+		}
 }
 
 func init() {

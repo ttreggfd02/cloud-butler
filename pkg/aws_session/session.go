@@ -34,3 +34,24 @@ func NewConfig(ctx context.Context) (aws.Config, error) {
 
 	return cfg, nil
 }
+// NewConfigWithRegion 建立並回傳一個指定區域的 AWS 組態設定
+func NewConfigWithRegion(ctx context.Context, region string) (aws.Config, error) {
+	accessKeyID := viper.GetString("aws.accessKeyID")
+	secretAccessKey := viper.GetString("aws.secretAccessKey")
+
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion(region), // <-- 使用傳入的 region
+		config.WithCredentialsProvider(aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
+			return aws.Credentials{
+				AccessKeyID:     accessKeyID,
+				SecretAccessKey: secretAccessKey,
+			}, nil
+		})),
+	)
+
+	if err != nil {
+		return aws.Config{}, err
+	}
+
+	return cfg, nil
+}
