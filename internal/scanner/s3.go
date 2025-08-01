@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -12,14 +11,14 @@ import (
 	"github.com/ttreggfd02/cloud-butler/pkg/aws_session"
 )
 
-// PublicBucketResult 用來存放公開 S3 儲存桶的掃描結果
+// PublicBucketResult stores the results of the S3 public bucket scan.
 type PublicBucketResult struct {
 	BucketName string
 	Region     string
 	Issue      string
 }
 
-// ScanPublicS3Buckets 掃描公開存取的 S3 儲存桶
+// ScanPublicS3Buckets scans for publicly accessible S3 buckets.
 func ScanPublicS3Buckets(ctx context.Context, cfg aws.Config) ([]PublicBucketResult, error) {
 	client := s3.NewFromConfig(cfg)
 	var results []PublicBucketResult
@@ -58,7 +57,7 @@ func ScanPublicS3Buckets(ctx context.Context, cfg aws.Config) ([]PublicBucketRes
 			Bucket: bucket.Name,
 		})
 
-		var nspab *types.NoSuchPublicAccessBlockConfiguration
+		var nspab types.NoSuchPublicAccessBlockConfiguration
 		if errors.As(err, &nspab) {
 			results = append(results, PublicBucketResult{
 				BucketName: bucketName,
